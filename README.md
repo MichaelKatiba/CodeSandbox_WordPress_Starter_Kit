@@ -177,7 +177,19 @@ Don't leave the tab open if you aren't working!
 ---
 ## FAQs
 
-**Q: Site Health says "Page cache is not detected".**
+### **Q: Cheat Sheet: What do all these commands do?**
+**A:** Here is a guide to the terminal commands you will use to manage your site.
+
+| Command | What it does | Safety Level | When to use |
+| :--- | :--- | :--- | :--- |
+| **`docker compose up -d`** | **The "Start Button"**<br>Starts your site in the background. If the server is already built, it simply turns it on. | ✅ **Safe**<br>Keeps all data. | Use this to turn the site on after it has been stopped or if the Devbox restarted. |
+| **`docker compose up -d --build`** | **The "Update Button"**<br>Re-reads your `.env` file and `Dockerfile`, rebuilds the server with new settings, and starts it. | ✅ **Safe**<br>Keeps database data, but updates the server software (e.g., changing PHP versions). | Use this **only** when you change `.env` settings (like `PHP_VERSION`) or modify the `Dockerfile`. |
+| **`docker compose stop`** | **The "Pause Button"**<br>Gracefully shuts down the server to save CodeSandbox credits. | ✅ **Safe**<br>Keeps all data, containers, and settings. | Use this when you are done working for the day but want to pick up exactly where you left off. |
+| **`docker compose down`** | **The "Cleanup"**<br>Stops the site and deletes the temporary containers/networks, but **leaves your database and files on the disk**. | ✅ **Safe**<br>Keeps your posts, pages, plugins, and configuration. | Use this if the server is acting glitchy and you want to "turn it off and on again" cleanly without losing work. |
+| **`docker compose down -v`** | **The "Factory Reset"**<br>Stops the site and **deletes EVERYTHING** (Containers + Database + Shared Volumes). | ❌ **Destructive**<br>Deletes all posts, users, and settings. Resets to a blank slate. | Use this when you want to start a brand new project or if you are changing the `WP_VERSION` (to avoid version conflicts). |
+| **`sh install.sh`** | **The "Setup Wizard"**<br>Runs the script that creates the database, admin user, and fixes file permissions. | ⚠️ **Caution**<br>Safe to run, but will fail if WordPress is already installed. | Use this **only once** immediately after building a fresh site (or after running `down -v`). |
+
+**Q: WordPress > Tools > Site Health says "Page cache is not detected".**
 
 **A:** This is normal. We do not include a caching plugin by default because caching interferes with development (it hides your changes). You should only install a caching plugin when you are ready to simulate a production environment.
 
