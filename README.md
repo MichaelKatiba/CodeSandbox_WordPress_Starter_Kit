@@ -1,5 +1,3 @@
----
-
 # 🚀 CodeSandbox WordPress Starter Kit
 
 **Automated. Flexible. Dockerized.**
