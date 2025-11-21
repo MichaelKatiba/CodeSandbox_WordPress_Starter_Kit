@@ -1,0 +1,78 @@
+version: '3.1'
+
+services:
+  wordpress:
+    build:
+      context: .
+      args:
+        WP_VERSION: ${WP_VERSION}
+        PHP_VERSION: ${PHP_VERSION}
+    ports:
+      - ${WP_PORT}:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      # FIX: Make WordPress accept the CodeSandbox Cloud URL dynamically
+      WORDPRESS_CONFIG_EXTRA: |
+        define('FORCE_SSL_ADMIN', true);
+        if (strpos($$_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false)
+          $$_SERVER['HTTPS']='on';
+        
+        define('WP_HOME', 'https://' . $$_SERVER['HTTP_HOST']);
+        define('WP_SITEURL', 'https://' . $$_SERVER['HTTP_HOST']);
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./.config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - wp_core:/var/www/html
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: mariadb:${DB_VERSION}
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+
+  wpcli:
+    image: wordpress:cli
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      # FIX 1: Mount the same volume here so CLI sees the files!
+      - wp_core:/var/www/html
+    depends_on:
+      - db
+      - wordpress
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - ${MAILHOG_PORT}:8025
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - ${PMA_PORT}:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      UPLOAD_LIMIT: 64M
+
+volumes:
+  db_data:
+  # FIX 1: Define the shared volume
+  wp_core:
