@@ -1,5 +1,10 @@
 {
-  "setupTasks": [],
+  "setupTasks": [
+    {
+      "name": "Install Basic PHP (For Editor Support)",
+      "command": "sudo apt-get update && sudo apt-get install -y php-cli"
+    }
+  ],
   "tasks": {
     "start-server": {
       "name": "Start WordPress",
